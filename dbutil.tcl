@@ -5,6 +5,19 @@
 ## sqlite3 specific database utilities to query and manipulate a
 ## database schema.
 
+# @@ Meta Begin
+# Package dbutil 0
+# Meta author   {Andreas Kupries}
+# Meta location https://core.tcl.tk/akupries/dbutil
+# Meta platform tcl
+# Meta summary Sqlite3 database utility commands.
+# Meta description Utilities to quickly initialize and
+# Meta description check schemata in sqlite3 databases.
+# Meta subject sqlite database relation table index
+# Meta require {Tcl 8.5-}
+# Meta require sqlite3
+# @@ Meta End
+
 # # ## ### ##### ######## ############# #####################
 ## Requisites
 
@@ -65,13 +78,22 @@ proc dbutil::initialize-schema {db evar args} {
     # args = schema = dict (table -> def)
     # where def = list (sql, table-info-spec)
 
+    # args = dict (table-name --> table-definition)
+    # table-definition = list (sql-for-create
+    #                          table-info-for-check
+    #                          indices)
+
     dict for {table def} $args {
-	lassign $def sql info
+	lassign $def sql info indices
 	if {[has $db $table]} {
 	    return [check $db $table $info reason]
 	}
 	$db transaction {
 	    $db eval "CREATE TABLE \"$table\" ( $sql )"
+	    set counter 0
+	    foreach columnlist $indices {
+		$db eval "CREATE INDEX \"${table}$counter\" ON \"$table\" ( [join $columnlist ,] )"
+	    }
 	}
     }
     return 1
