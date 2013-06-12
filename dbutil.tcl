@@ -73,6 +73,17 @@ proc dbutil::check {db table spec evar} {
     return 1
 }
 
+proc dbutil::setup {db table sql {indices {}}} {
+    $db transaction {
+	$db eval "CREATE TABLE \"$table\" ( $sql )"
+	set counter 0
+	foreach columnlist $indices {
+	    $db eval "CREATE INDEX \"${table}$counter\" ON \"$table\" ( [join $columnlist ,] )"
+	}
+    }
+    return
+}
+
 proc dbutil::initialize-schema {db evar args} {
     upvar 1 $evar reason
     # args = schema = dict (table -> def)
@@ -88,13 +99,7 @@ proc dbutil::initialize-schema {db evar args} {
 	if {[has $db $table]} {
 	    return [check $db $table $info reason]
 	}
-	$db transaction {
-	    $db eval "CREATE TABLE \"$table\" ( $sql )"
-	    set counter 0
-	    foreach columnlist $indices {
-		$db eval "CREATE INDEX \"${table}$counter\" ON \"$table\" ( [join $columnlist ,] )"
-	    }
-	}
+	setup $db $table $sql $indices
     }
     return 1
 }
