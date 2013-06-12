@@ -79,6 +79,7 @@ proc dbutil::setup {db table sql {indices {}}} {
 	set counter 0
 	foreach columnlist $indices {
 	    $db eval "CREATE INDEX \"${table}$counter\" ON \"$table\" ( [join $columnlist ,] )"
+	    incr counter
 	}
     }
     return
