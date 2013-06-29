@@ -16,6 +16,7 @@
 # Meta subject sqlite database relation table index
 # Meta require {Tcl 8.5-}
 # Meta require sqlite3
+# Meta category Database
 # @@ Meta End
 
 # # ## ### ##### ######## ############# #####################
